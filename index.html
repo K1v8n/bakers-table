@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Baker's Table</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cream: #fdf6ec;
+      --brown: #5c3d2e;
+      --gold: #c9922a;
+      --rust: #b85c38;
+      --tan: #e8c99a;
+      --light: #fff8f0;
+      --dark: #2e1a0e;
+      --shadow: rgba(92, 61, 46, 0.15);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      background: var(--cream);
+      color: var(--dark);
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999; opacity: 0.4;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      background: rgba(253,246,236,0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--tan);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 64px;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem; color: var(--brown); letter-spacing: 0.02em;
+    }
+    .logo span { color: var(--gold); font-style: italic; }
+    nav ul { list-style: none; display: flex; gap: 32px; }
+    nav ul a {
+      text-decoration: none; color: var(--brown);
+      font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase;
+      font-weight: 700; transition: color 0.2s;
+    }
+    nav ul a:hover { color: var(--gold); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(160deg, #fdf0dc 0%, #f5dbb8 50%, #eed4a0 100%);
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 120px 24px 80px;
+      position: relative; overflow: hidden;
+    }
+    .hero-bg-text {
+      position: absolute; font-family: 'Playfair Display', serif;
+      font-size: clamp(80px, 18vw, 260px); color: rgba(201,146,42,0.07);
+      font-weight: 700; white-space: nowrap; user-select: none;
+      top: 50%; transform: translateY(-50%); letter-spacing: -0.02em;
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 680px; }
+    .hero-eyebrow {
+      font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--gold); font-weight: 700; margin-bottom: 16px;
+      opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      line-height: 1.1; color: var(--brown);
+      opacity: 0; animation: fadeUp 0.8s 0.4s forwards;
+    }
+    .hero h1 em { color: var(--rust); font-style: italic; }
+    .hero p {
+      margin: 24px 0 40px; font-size: 1.1rem; line-height: 1.7;
+      color: #7a5c46; font-weight: 300;
+      opacity: 0; animation: fadeUp 0.8s 0.6s forwards;
+    }
+    .hero-btns {
+      display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+      opacity: 0; animation: fadeUp 0.8s 0.8s forwards;
+    }
+    .btn {
+      padding: 14px 32px; border-radius: 4px; font-size: 0.9rem;
+      font-weight: 700; letter-spacing: 0.08em; cursor: pointer;
+      border: 2px solid transparent; transition: all 0.25s; text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary { background: var(--brown); color: var(--cream); }
+    .btn-primary:hover { background: var(--rust); transform: translateY(-2px); box-shadow: 0 8px 24px var(--shadow); }
+    .btn-outline { border-color: var(--brown); color: var(--brown); background: transparent; }
+    .btn-outline:hover { background: var(--brown); color: var(--cream); transform: translateY(-2px); }
+
+    /* ── SECTION SHARED ── */
+    section { padding: 96px 24px; }
+    .section-label {
+      font-size: 0.7rem; letter-spacing: 0.35em; text-transform: uppercase;
+      color: var(--gold); font-weight: 700; margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--brown); line-height: 1.2;
+    }
+    .section-title em { font-style: italic; color: var(--rust); }
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    /* ── RECIPE FINDER ── */
+    #recipes { background: var(--light); }
+    .recipe-intro { max-width: 560px; margin-bottom: 48px; }
+    .recipe-intro p { color: #7a5c46; line-height: 1.7; margin-top: 12px; }
+
+    .search-bar {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .search-bar input {
+      flex: 1; min-width: 240px; padding: 14px 20px;
+      border: 2px solid var(--tan); border-radius: 4px;
+      background: white; font-family: 'Lato', sans-serif;
+      font-size: 0.95rem; color: var(--dark); outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus { border-color: var(--gold); }
+    .filter-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+    .filter-btn {
+      padding: 8px 18px; border-radius: 20px; border: 2px solid var(--tan);
+      background: white; cursor: pointer; font-size: 0.8rem;
+      font-weight: 700; letter-spacing: 0.06em; color: var(--brown);
+      transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--brown); color: var(--cream); border-color: var(--brown);
+    }
+
+    .recipe-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 28px;
+    }
+    .recipe-card {
+      background: white; border-radius: 8px; overflow: hidden;
+      box-shadow: 0 4px 20px var(--shadow);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+    .recipe-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px var(--shadow); }
+    .recipe-card-img {
+      height: 200px; display: flex; align-items: center; justify-content: center;
+      font-size: 4rem; position: relative; overflow: hidden;
+    }
+    .recipe-card-img img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .recipe-card:hover .recipe-card-img img {
+      transform: scale(1.07);
+    }
+    .recipe-card-body { padding: 20px; }
+    .recipe-tag {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+      font-weight: 700; margin-bottom: 8px;
+    }
+    .tag-bread { background: #f5e6d0; color: #8B5E3C; }
+    .tag-cake  { background: #fce4ec; color: #c2185b; }
+    .tag-cookie{ background: #fff8e1; color: #f57f17; }
+    .tag-pastry{ background: #e8f5e9; color: #2e7d32; }
+    .recipe-card-body h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem; color: var(--brown); margin-bottom: 6px;
+    }
+    .recipe-card-body p { font-size: 0.85rem; color: #9a7a6a; line-height: 1.5; }
+    .recipe-meta {
+      display: flex; gap: 16px; margin-top: 16px;
+      font-size: 0.78rem; color: #b89880; font-weight: 700;
+    }
+    .recipe-meta span::before { margin-right: 4px; }
+    .no-results { grid-column: 1/-1; text-align: center; padding: 48px; color: #b89880; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(46,26,14,0.7);
+      z-index: 500; display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s; padding: 24px;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: white; border-radius: 12px; max-width: 620px; width: 100%;
+      max-height: 85vh; overflow-y: auto;
+      transform: translateY(20px); transition: transform 0.3s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-header {
+      padding: 32px 32px 0;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem; color: var(--brown);
+    }
+    .modal-body { padding: 24px 32px 32px; }
+    .modal-body h4 {
+      font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--gold); margin: 20px 0 10px;
+    }
+    .modal-body ul { padding-left: 20px; }
+    .modal-body li { margin-bottom: 6px; font-size: 0.95rem; color: #5a3d2e; line-height: 1.5; }
+    .modal-img {
+      width: 100%; height: 220px; object-fit: cover;
+      border-radius: 12px 12px 0 0; display: block;
+    }
+    .modal-close-btn {
+      position: absolute; top: 12px; right: 16px;
+      background: rgba(255,255,255,0.9); border: none;
+      font-size: 1.2rem; cursor: pointer; color: var(--brown);
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .modal { position: relative; }
+      background: none; border: none; font-size: 1.4rem; cursor: pointer;
+      color: var(--brown);
+    }
+
+    /* ── TIMER ── */
+    #timer { background: var(--brown); color: var(--cream); text-align: center; }
+    #timer .section-label { color: var(--tan); }
+    #timer .section-title { color: var(--cream); }
+    #timer .section-title em { color: var(--tan); }
+    .timer-ui {
+      margin-top: 48px; display: flex; flex-direction: column;
+      align-items: center; gap: 32px;
+    }
+    .timer-display {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(4rem, 12vw, 8rem); font-weight: 700;
+      letter-spacing: -0.02em; color: var(--tan);
+      line-height: 1;
+    }
+    .timer-controls { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .timer-btn {
+      padding: 12px 28px; border-radius: 4px; border: 2px solid var(--tan);
+      background: transparent; color: var(--cream); cursor: pointer;
+      font-family: 'Lato', sans-serif; font-size: 0.85rem;
+      font-weight: 700; letter-spacing: 0.1em; transition: all 0.2s;
+    }
+    .timer-btn:hover, .timer-btn.active-btn { background: var(--tan); color: var(--brown); }
+    .timer-presets { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .preset {
+      padding: 8px 16px; border-radius: 20px; background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2); cursor: pointer;
+      font-size: 0.8rem; color: var(--tan); transition: all 0.2s;
+      font-family: 'Lato', sans-serif; font-weight: 700;
+    }
+    .preset:hover { background: rgba(255,255,255,0.2); }
+    .custom-time {
+      display: flex; gap: 12px; align-items: center;
+    }
+    .custom-time input {
+      width: 80px; padding: 10px; background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2); border-radius: 4px;
+      color: var(--cream); font-size: 1rem; text-align: center;
+      font-family: 'Lato', sans-serif; outline: none; transition: border-color 0.2s;
+    }
+    .custom-time input:focus { border-color: var(--tan); }
+    .custom-time label { font-size: 0.8rem; color: var(--tan); }
+
+    /* ── TIPS ── */
+    #tips { background: var(--cream); }
+    .tips-grid {
+      margin-top: 48px; display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .tip-card {
+      background: white; border-radius: 8px; padding: 28px;
+      box-shadow: 0 4px 20px var(--shadow);
+      border-left: 4px solid var(--gold);
+      transition: transform 0.3s;
+    }
+    .tip-card:hover { transform: translateY(-4px); }
+    .tip-icon { font-size: 2.4rem; margin-bottom: 16px; }
+    .tip-card h3 {
+      font-family: 'Playfair Display', serif; font-size: 1.1rem;
+      color: var(--brown); margin-bottom: 10px;
+    }
+    .tip-card p { font-size: 0.88rem; color: #7a5c46; line-height: 1.7; }
+
+    /* ── QUIZ ── */
+    #quiz { background: #f5ebe0; text-align: center; }
+    .quiz-box {
+      background: white; border-radius: 12px; padding: 40px;
+      max-width: 580px; margin: 48px auto 0;
+      box-shadow: 0 8px 40px var(--shadow);
+    }
+    .quiz-q {
+      font-family: 'Playfair Display', serif; font-size: 1.4rem;
+      color: var(--brown); margin-bottom: 28px; line-height: 1.4;
+    }
+    .quiz-options { display: flex; flex-direction: column; gap: 12px; }
+    .quiz-opt {
+      padding: 14px 20px; border-radius: 6px;
+      border: 2px solid var(--tan); background: white;
+      cursor: pointer; font-size: 0.95rem; color: var(--brown);
+      text-align: left; transition: all 0.2s; font-family: 'Lato', sans-serif;
+    }
+    .quiz-opt:hover { border-color: var(--gold); background: #fff8f0; }
+    .quiz-opt.correct { border-color: #4caf50; background: #e8f5e9; color: #2e7d32; }
+    .quiz-opt.wrong   { border-color: #f44336; background: #fdecea; color: #c62828; }
+    .quiz-feedback {
+      margin-top: 20px; font-size: 1rem; font-weight: 700;
+      min-height: 28px; color: var(--rust);
+    }
+    .quiz-next {
+      margin-top: 24px; display: none;
+    }
+    .quiz-score {
+      font-family: 'Playfair Display', serif; font-size: 1.8rem;
+      color: var(--brown); margin-bottom: 12px;
+    }
+    .progress-bar {
+      height: 6px; background: var(--tan); border-radius: 3px;
+      margin-bottom: 28px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; background: var(--gold); border-radius: 3px;
+      transition: width 0.4s;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark); color: rgba(255,255,255,0.5);
+      text-align: center; padding: 40px 24px;
+      font-size: 0.85rem;
+    }
+    footer span { color: var(--tan); font-family: 'Playfair Display', serif; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.7s, transform 0.7s;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">The <span>Baker's</span> Table</div>
+  <ul>
+    <li><a href="#recipes">Recipes</a></li>
+    <li><a href="#timer">Timer</a></li>
+    <li><a href="#tips">Tips</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg-text">BAKE</div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">✦ Welcome to your kitchen companion</div>
+    <h1>Where <em>flour, butter,</em><br>& love meet.</h1>
+    <p>Discover hand-crafted recipes, a built-in baking timer, pro tips, and a fun quiz — everything you need to bake with confidence.</p>
+    <div class="hero-btns">
+      <a href="#recipes" class="btn btn-primary">Browse Recipes</a>
+      <a href="#quiz" class="btn btn-outline">Take the Quiz</a>
+    </div>
+  </div>
+</section>
+
+<!-- RECIPE FINDER -->
+<section id="recipes">
+  <div class="container">
+    <div class="recipe-intro reveal">
+      <div class="section-label">✦ The Kitchen</div>
+      <h2 class="section-title">Find your next <em>masterpiece</em></h2>
+      <p>Search by name or filter by category. Click any card to see the full recipe.</p>
+    </div>
+    <div class="search-bar reveal">
+      <input type="text" id="searchInput" placeholder="Search recipes… (e.g. sourdough, brownies)" oninput="filterRecipes()"/>
+      <button class="btn btn-primary" onclick="filterRecipes()">Search</button>
+    </div>
+    <div class="filter-btns reveal">
+      <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+      <button class="filter-btn" onclick="setFilter('bread', this)">🍞 Bread</button>
+      <button class="filter-btn" onclick="setFilter('cake', this)">🎂 Cakes</button>
+      <button class="filter-btn" onclick="setFilter('cookie', this)">🍪 Cookies</button>
+      <button class="filter-btn" onclick="setFilter('pastry', this)">🥐 Pastry</button>
+    </div>
+    <div class="recipe-grid" id="recipeGrid"></div>
+  </div>
+</section>
+
+<!-- RECIPE MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal"></div>
+</div>
+
+<!-- TIMER -->
+<section id="timer">
+  <div class="container">
+    <div class="section-label reveal">✦ The Oven</div>
+    <h2 class="section-title reveal">Baking <em>Timer</em></h2>
+    <div class="timer-ui">
+      <div class="timer-display" id="timerDisplay">00:00</div>
+      <div class="timer-presets reveal">
+        <button class="preset" onclick="setTimer(5)">5 min</button>
+        <button class="preset" onclick="setTimer(10)">10 min</button>
+        <button class="preset" onclick="setTimer(20)">20 min</button>
+        <button class="preset" onclick="setTimer(30)">30 min</button>
+        <button class="preset" onclick="setTimer(45)">45 min</button>
+        <button class="preset" onclick="setTimer(60)">1 hr</button>
+      </div>
+      <div class="custom-time reveal">
+        <label>Custom:</label>
+        <input type="number" id="customMins" placeholder="min" min="0" max="300"/>
+        <input type="number" id="customSecs" placeholder="sec" min="0" max="59"/>
+        <button class="timer-btn" onclick="setCustomTimer()">Set</button>
+      </div>
+      <div class="timer-controls reveal">
+        <button class="timer-btn" id="startBtn" onclick="startTimer()">▶ Start</button>
+        <button class="timer-btn" onclick="pauseTimer()">⏸ Pause</button>
+        <button class="timer-btn" onclick="resetTimer()">↺ Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIPS -->
+<section id="tips">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">✦ The Wisdom</div>
+      <h2 class="section-title">Pro baking <em>secrets</em></h2>
+    </div>
+    <div class="tips-grid" id="tipsGrid"></div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">✦ The Test</div>
+      <h2 class="section-title">How well do you <em>know</em> baking?</h2>
+    </div>
+    <div class="quiz-box reveal">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="quiz-q" id="quizQ"></div>
+      <div class="quiz-options" id="quizOpts"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="quiz-next" id="quizNext">
+        <button class="btn btn-primary" onclick="nextQuestion()">Next Question →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Made with 🧈 by <span>The Baker's Table</span> &nbsp;·&nbsp; Happy Baking!</p>
+</footer>
+
+<script>
+// ─────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────
+const recipes = [
+  {
+    id:1, name:"Classic Sourdough", category:"bread",
+    img:"https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=600&q=80",
+    time:"3 hrs", difficulty:"Advanced",
+    desc:"Tangy, chewy sourdough with a crackling crust.",
+    ingredients:["500g bread flour","375ml water","10g salt","100g active starter"],
+    steps:["Mix flour and water; rest 30 mins (autolyse).","Add starter and salt; fold every 30 mins for 2 hrs.","Shape and proof overnight in fridge.","Bake at 230°C in a dutch oven for 45 mins."]
+  },
+  {
+    id:2, name:"Chocolate Fudge Cake", category:"cake",
+    img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80",
+    time:"1 hr 15 min", difficulty:"Intermediate",
+    desc:"Ultra-moist triple-chocolate layer cake.",
+    ingredients:["200g dark chocolate","200g butter","300g sugar","4 eggs","200g flour","50g cocoa"],
+    steps:["Melt chocolate and butter together.","Whisk in sugar and eggs.","Fold in flour and cocoa.","Bake at 175°C for 35–40 mins.","Frost with ganache when cool."]
+  },
+  {
+    id:3, name:"Brown Butter Cookies", category:"cookie",
+    img:"https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=600&q=80",
+    time:"45 min", difficulty:"Easy",
+    desc:"Nutty, chewy cookies with crisp golden edges.",
+    ingredients:["225g butter","200g brown sugar","100g white sugar","2 eggs","350g flour","1 tsp baking soda","pinch salt","chocolate chips"],
+    steps:["Brown butter in a saucepan until golden.","Cool slightly, then mix with sugars.","Beat in eggs one at a time.","Fold in dry ingredients and chips.","Chill 1 hr, then bake at 175°C for 12 mins."]
+  },
+  {
+    id:4, name:"Butter Croissants", category:"pastry",
+    img:"https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&q=80",
+    time:"8 hrs", difficulty:"Advanced",
+    desc:"Shatteringly flaky, buttery laminated pastry.",
+    ingredients:["500g flour","10g salt","60g sugar","7g yeast","300ml cold milk","250g cold butter (for lamination)"],
+    steps:["Make dough; chill overnight.","Beat butter into a flat square.","Laminate butter into dough with 3 folds.","Rest 30 min between each fold.","Cut, shape, proof 2 hrs.","Egg wash and bake at 190°C for 18 mins."]
+  },
+  {
+    id:5, name:"Lemon Drizzle Loaf", category:"cake",
+    img:"https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=600&q=80",
+    time:"1 hr", difficulty:"Easy",
+    desc:"Zesty, moist loaf with a crunchy lemon sugar crust.",
+    ingredients:["175g butter","175g caster sugar","3 eggs","175g self-raising flour","2 lemons (zest + juice)","85g icing sugar"],
+    steps:["Cream butter and sugar until fluffy.","Beat in eggs one by one, then fold in flour and zest.","Bake at 180°C for 45 mins.","Mix lemon juice and icing sugar; pour over warm cake."]
+  },
+  {
+    id:6, name:"Cinnamon Rolls", category:"pastry",
+    img:"https://images.unsplash.com/photo-1509365465985-25d11c17e812?w=600&q=80",
+    time:"2 hrs 30 min", difficulty:"Intermediate",
+    desc:"Pillowy soft rolls smothered in cream cheese frosting.",
+    ingredients:["500g flour","7g yeast","80ml warm milk","2 eggs","60g butter","1 tsp salt","200g brown sugar","2 tbsp cinnamon","cream cheese frosting"],
+    steps:["Make enriched dough; proof 1 hr.","Roll out, spread butter, sprinkle sugar and cinnamon.","Roll up tight; cut into 12 rolls.","Proof 45 mins, bake at 180°C for 25 mins.","Frost while warm."]
+  },
+  {
+    id:7, name:"Focaccia", category:"bread",
+    img:"https://images.unsplash.com/photo-1574085733277-851d9d856a3a?w=600&q=80",
+    time:"2 hrs", difficulty:"Easy",
+    desc:"Dimply, olive-oil drenched Italian flatbread.",
+    ingredients:["500g flour","7g yeast","380ml warm water","10g salt","60ml olive oil","rosemary","sea salt flakes"],
+    steps:["Mix flour, water, yeast; rest 10 mins.","Add salt and oil; knead briefly.","Proof 1 hr, transfer to oiled tray.","Dimple with fingers, top with rosemary and salt.","Bake at 220°C for 22 mins."]
+  },
+  {
+    id:8, name:"Shortbread", category:"cookie",
+    img:"https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&q=80",
+    time:"30 min", difficulty:"Easy",
+    desc:"Three-ingredient buttery melt-in-mouth classic.",
+    ingredients:["225g butter (room temp)","100g caster sugar","300g plain flour"],
+    steps:["Beat butter and sugar until creamy.","Stir in flour until it comes together.","Press into tin or roll and cut.","Bake at 160°C for 20–25 mins until pale gold.","Dust with sugar while warm."]
+  }
+];
+
+const tips = [
+  { icon:"🌡️", title:"Room Temperature Matters", text:"Always bring butter, eggs, and dairy to room temperature before baking. Cold fat doesn't cream properly and cold eggs can cause batter to curdle." },
+  { icon:"⚖️", title:"Weigh Your Ingredients", text:"Baking is chemistry. Cup measurements vary wildly — invest in a digital scale. Even 10g off on flour can ruin a loaf." },
+  { icon:"🚪", title:"Don't Peek in the Oven", text:"Opening the oven door drops temperature by up to 50°F. Cakes can sink and bread can deflate. Use the oven light instead." },
+  { icon:"🥛", title:"The Toothpick Test", text:"Insert a toothpick into the center. Clean = done. Wet crumbs = more time needed. This works for nearly every cake and muffin." },
+  { icon:"❄️", title:"Cool Before Frosting", text:"Frosting a warm cake is a disaster waiting to happen. Wait until it's fully cool — even refrigerate briefly — before applying any frosting." },
+  { icon:"🧂", title:"Salt is Non-Negotiable", text:"Salt doesn't just season — it controls yeast, strengthens gluten, and balances sweetness. Never skip it in bread, even slightly sweet loaves." },
+];
+
+const quizQuestions = [
+  { q:"What does 'proofing' mean in bread baking?", opts:["Checking a recipe","Letting dough rise","Kneading the dough","Adding yeast"], answer:1 },
+  { q:"Which fat makes the flakiest pie crust?", opts:["Olive oil","Margarine","Shortening or lard","Butter"], answer:3 },
+  { q:"What does baking soda need to activate?", opts:["Heat alone","An acid (buttermilk, lemon, vinegar)","Cold water","Sugar"], answer:1 },
+  { q:"What temperature is typically 'room temp' for butter in recipes?", opts:["5°C","20–22°C","35°C","50°C"], answer:1 },
+  { q:"Why do you cream butter and sugar first in a cake?", opts:["For flavour","To incorporate air for a lighter crumb","To melt the butter","To dissolve the sugar"], answer:1 },
+  { q:"What is lamination in pastry-making?", opts:["Glazing with egg wash","Folding butter into dough repeatedly","Adding layers of cream","Icing the top of a tart"], answer:1 },
+];
+
+// ─────────────────────────────────────────
+// RECIPE LOGIC
+// ─────────────────────────────────────────
+let currentFilter = 'all';
+
+function setFilter(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterRecipes();
+}
+
+function filterRecipes() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = recipes.filter(r => {
+    const matchCat = currentFilter === 'all' || r.category === currentFilter;
+    const matchQ = r.name.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+  renderRecipes(filtered);
+}
+
+function renderRecipes(list) {
+  const grid = document.getElementById('recipeGrid');
+  if (!list.length) {
+    grid.innerHTML = '<div class="no-results">No recipes found. Try a different search! 🧁</div>';
+    return;
+  }
+  grid.innerHTML = list.map(r => `
+    <div class="recipe-card" onclick="openModal(${r.id})">
+      <div class="recipe-card-img"><img src="${r.img}" alt="${r.name}" loading="lazy"/></div>
+      <div class="recipe-card-body">
+        <span class="recipe-tag tag-${r.category}">${r.category}</span>
+        <h3>${r.name}</h3>
+        <p>${r.desc}</p>
+        <div class="recipe-meta">
+          <span>⏱ ${r.time}</span>
+          <span>⭐ ${r.difficulty}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openModal(id) {
+  const r = recipes.find(x => x.id === id);
+  document.getElementById('modal').innerHTML = `
+    <img class="modal-img" src="${r.img}" alt="${r.name}"/>
+    <button class="modal-close-btn" onclick="closeModalBtn()">✕</button>
+    <div style="padding:28px 32px 0;font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--brown)">${r.name}</div>
+    <div style="padding:16px 32px 32px">
+      <p style="color:#7a5c46;margin-bottom:4px">${r.desc}</p>
+      <h4 style="font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin:20px 0 10px">Ingredients</h4>
+      <ul style="padding-left:20px">${r.ingredients.map(i=>`<li style="margin-bottom:6px;font-size:.95rem;color:#5a3d2e;line-height:1.5">${i}</li>`).join('')}</ul>
+      <h4 style="font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin:20px 0 10px">Instructions</h4>
+      <ol style="padding-left:20px">${r.steps.map(s=>`<li style="margin-bottom:8px;font-size:.95rem;color:#5a3d2e;line-height:1.5">${s}</li>`).join('')}</ol>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(e) { if (e.target.id === 'modalOverlay') closeModalBtn(); }
+function closeModalBtn() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+// ─────────────────────────────────────────
+// TIMER LOGIC
+// ─────────────────────────────────────────
+let totalSeconds = 0, remaining = 0, timerInterval = null, running = false;
+
+function fmt(s) {
+  const m = Math.floor(s/60), sec = s%60;
+  return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function updateDisplay() { document.getElementById('timerDisplay').textContent = fmt(remaining); }
+
+function setTimer(mins) { pauseTimer(); remaining = totalSeconds = mins*60; updateDisplay(); }
+function setCustomTimer() {
+  const m = parseInt(document.getElementById('customMins').value)||0;
+  const s = parseInt(document.getElementById('customSecs').value)||0;
+  pauseTimer(); remaining = totalSeconds = m*60+s; updateDisplay();
+}
+function startTimer() {
+  if (running || remaining === 0) return;
+  running = true;
+  timerInterval = setInterval(() => {
+    if (remaining <= 0) { clearInterval(timerInterval); running=false; alert('⏰ Timer done! Your bake is ready!'); return; }
+    remaining--; updateDisplay();
+  }, 1000);
+}
+function pauseTimer() { clearInterval(timerInterval); running=false; }
+function resetTimer() { pauseTimer(); remaining=totalSeconds; updateDisplay(); }
+
+// ─────────────────────────────────────────
+// TIPS
+// ─────────────────────────────────────────
+function renderTips() {
+  document.getElementById('tipsGrid').innerHTML = tips.map(t=>`
+    <div class="tip-card reveal">
+      <div class="tip-icon">${t.icon}</div>
+      <h3>${t.title}</h3>
+      <p>${t.text}</p>
+    </div>
+  `).join('');
+}
+
+// ─────────────────────────────────────────
+// QUIZ LOGIC
+// ─────────────────────────────────────────
+let qIndex=0, score=0, answered=false;
+
+function renderQuestion() {
+  const q = quizQuestions[qIndex];
+  document.getElementById('progressFill').style.width = (qIndex/quizQuestions.length*100)+'%';
+  document.getElementById('quizQ').textContent = `Q${qIndex+1}: ${q.q}`;
+  document.getElementById('quizFeedback').textContent = '';
+  document.getElementById('quizNext').style.display='none';
+  answered = false;
+  document.getElementById('quizOpts').innerHTML = q.opts.map((o,i)=>
+    `<button class="quiz-opt" onclick="answerQ(${i})">${o}</button>`
+  ).join('');
+}
+
+function answerQ(i) {
+  if (answered) return;
+  answered = true;
+  const q = quizQuestions[qIndex];
+  const btns = document.querySelectorAll('.quiz-opt');
+  btns[q.answer].classList.add('correct');
+  if (i !== q.answer) {
+    btns[i].classList.add('wrong');
+    document.getElementById('quizFeedback').textContent = '✗ Not quite — the correct answer is highlighted.';
+  } else {
+    score++;
+    document.getElementById('quizFeedback').textContent = '✓ Correct! Well done, baker!';
+  }
+  document.getElementById('quizNext').style.display = 'block';
+}
+
+function nextQuestion() {
+  qIndex++;
+  if (qIndex >= quizQuestions.length) {
+    document.getElementById('progressFill').style.width='100%';
+    document.getElementById('quizQ').innerHTML = `<div class="quiz-score">You scored ${score} / ${quizQuestions.length}!</div>${score>=5?'🏆 Master Baker!':score>=3?'👨‍🍳 Getting there!':'🎓 Keep practicing!'}`;
+    document.getElementById('quizOpts').innerHTML='';
+    document.getElementById('quizFeedback').textContent='';
+    document.getElementById('quizNext').innerHTML='<button class="btn btn-primary" onclick="restartQuiz()">Try Again</button>';
+    document.getElementById('quizNext').style.display='block';
+  } else { renderQuestion(); }
+}
+function restartQuiz() { qIndex=0; score=0; renderQuestion(); }
+
+// ─────────────────────────────────────────
+// SCROLL REVEAL
+// ─────────────────────────────────────────
+function initReveal() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+}
+
+// ─────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  filterRecipes();
+  renderTips();
+  renderQuestion();
+  setTimeout(initReveal, 100);
+});
+</script>
+</body>
+</html>
